@@ -12,32 +12,57 @@ def _build_half_hull_mesh(
     vertices: list[tuple[float, float, float]] = []
     faces: list[tuple[int, int, int, int]] = []
 
-    station_count = 14
-    row_count = 6
+    station_count = 16
+    row_count = 7
 
     for station_index in range(station_count):
         t = station_index / (station_count - 1)
-        x = params.x_at(t)
+        base_x = params.x_at(t)
         half_beam = params.half_beam_at(t)
         keel_z = params.keel_z_at(t)
         deck_z = params.deck_z_at(t)
         hull_depth = deck_z - keel_z
-        chine_z = keel_z + hull_depth * 0.16
-        bilge_z = keel_z + hull_depth * 0.38
-        shoulder_z = deck_z - (0.24 + 0.04 * (1.0 - abs(t - 0.56) * 1.8))
-        flare = 0.03 + (0.07 * max(0.0, 0.18 - t)) + (0.02 * max(0.0, t - 0.84))
-        deck_edge_y = half_beam * (0.82 if t < 0.10 else 0.86 if t > 0.90 else 0.92)
+        chine_z = keel_z + hull_depth * 0.17
+        bilge_z = keel_z + hull_depth * 0.34
+        lower_topside_z = keel_z + hull_depth * 0.56
+        shoulder_z = deck_z - (0.24 + 0.05 * max(0.0, 0.50 - t) + 0.04 * max(0.0, t - 0.80))
+        sheer_z = deck_z - 0.06
+        bow_rake = max(0.0, (t - 0.80) / 0.20)
+        stern_taper = max(0.0, (0.18 - t) / 0.18)
+        flare = 0.02 + (0.04 * max(0.0, 0.16 - t)) + (0.01 * max(0.0, t - 0.88))
+        deck_edge_y = half_beam * (0.74 if t < 0.08 else 0.82 if t > 0.92 else 0.90)
 
-        vertices.extend(
-            [
-                (x, 0.0, keel_z),
-                (x, half_beam * 0.06, chine_z),
-                (x, half_beam * 0.34, bilge_z),
-                (x, half_beam * (0.60 + flare), shoulder_z),
-                (x, half_beam * (0.82 + flare * 0.30), deck_z - 0.08),
-                (x, deck_edge_y, deck_z),
-            ]
+        x_offsets = (
+            stern_taper * 0.05,
+            stern_taper * 0.09,
+            stern_taper * 0.11 - bow_rake * 0.03,
+            stern_taper * 0.16 - bow_rake * 0.10,
+            stern_taper * 0.22 - bow_rake * 0.22,
+            stern_taper * 0.32 - bow_rake * 0.38,
+            stern_taper * 0.39 - bow_rake * 0.58,
         )
+
+        widths = (
+            0.0,
+            half_beam * 0.06,
+            half_beam * 0.28,
+            half_beam * 0.53,
+            half_beam * (0.72 + flare * 0.35),
+            half_beam * (0.84 + flare * 0.25),
+            deck_edge_y,
+        )
+        heights = (
+            keel_z,
+            chine_z,
+            bilge_z,
+            lower_topside_z,
+            shoulder_z,
+            sheer_z,
+            deck_z,
+        )
+
+        for x_offset, width, height in zip(x_offsets, widths, heights):
+            vertices.append((base_x + x_offset, width, height))
 
     for station_index in range(station_count - 1):
         for row_index in range(row_count - 1):

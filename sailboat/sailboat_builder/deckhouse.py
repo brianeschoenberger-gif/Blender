@@ -50,20 +50,20 @@ def _build_half_cabin(
 ) -> tuple[list[tuple[float, float, float]], list[tuple[int, int, int, int]]]:
     vertices: list[tuple[float, float, float]] = []
     faces: list[tuple[int, int, int, int]] = []
-    cabin_stations = (0.26, 0.39, 0.52, 0.64)
+    cabin_stations = (0.24, 0.37, 0.52, 0.67)
     row_count = 3
 
     for station_index, t in enumerate(cabin_stations):
         x = params.x_at(t)
         base_z = params.deck_z_at(t)
-        width = max(params.cabin_half_width_at(t), 0.32)
-        roof_shape = (0.46, 0.76, 0.82, 0.56)[station_index]
+        width = max(params.cabin_half_width_at(t) * 0.94, 0.28)
+        roof_shape = (0.34, 0.60, 0.64, 0.42)[station_index]
 
         vertices.extend(
             [
                 (x, 0.0, base_z + params.cabin_roof_height * roof_shape),
-                (x, width * 0.50, base_z + params.cabin_roof_height * (roof_shape * 0.82)),
-                (x, width, base_z + 0.06),
+                (x, width * 0.54, base_z + params.cabin_roof_height * (roof_shape * 0.82)),
+                (x, width, base_z + 0.05),
             ]
         )
 
@@ -84,21 +84,21 @@ def _build_half_canopy(
     vertices: list[tuple[float, float, float]] = []
     faces: list[tuple[int, int, int, int]] = []
     section_ts = (0.00, 0.32, 0.68, 1.0)
-    canopy_start_x = params.stern_x() + 1.16
-    canopy_length = 1.62
+    canopy_start_x = params.stern_x() + 1.34
+    canopy_length = 1.48
     row_count = 2
 
     for section_t in section_ts:
         x = canopy_start_x + canopy_length * section_t
         hull_t = min(1.0, max(0.0, (x - params.stern_x()) / params.hull_length))
-        half_width = max(params.cabin_half_width_at(hull_t) * 1.06, 0.64)
+        half_width = max(params.cabin_half_width_at(hull_t) * 1.00, 0.58)
         deck_z = params.deck_z_at(hull_t)
-        crown = 0.025 + (0.03 if section_t < 0.75 else 0.012)
+        crown = 0.018 + (0.02 if section_t < 0.75 else 0.008)
 
         vertices.extend(
             [
-                (x, 0.0, deck_z + params.canopy_top_height + crown),
-                (x, half_width, deck_z + params.canopy_top_height),
+                (x, 0.0, deck_z + params.canopy_top_height + crown - 0.02),
+                (x, half_width, deck_z + params.canopy_top_height - 0.02),
             ]
         )
 
@@ -117,14 +117,14 @@ def _build_half_window_band(
 ) -> tuple[list[tuple[float, float, float]], list[tuple[int, int, int, int]]]:
     vertices: list[tuple[float, float, float]] = []
     faces: list[tuple[int, int, int, int]] = []
-    section_ts = (0.29, 0.40, 0.51, 0.62)
+    section_ts = (0.28, 0.40, 0.53, 0.66)
     row_count = 2
 
     for t in section_ts:
         x = params.x_at(t)
-        width = max(params.cabin_half_width_at(t) * 1.00, 0.32)
-        base_z = params.deck_z_at(t) + 0.20
-        top_z = base_z + 0.15
+        width = max(params.cabin_half_width_at(t) * 0.92, 0.28)
+        base_z = params.deck_z_at(t) + 0.15
+        top_z = base_z + 0.11
         vertices.extend([(x, width, top_z), (x, width * 0.98, base_z)])
 
     for section_index in range(len(section_ts) - 1):
@@ -142,14 +142,14 @@ def _build_half_windshield(
 ) -> tuple[list[tuple[float, float, float]], list[tuple[int, int, int, int]]]:
     front_t = 0.31
     front_x = params.x_at(front_t)
-    width = max(params.cabin_half_width_at(front_t) * 0.88, 0.40)
-    base_z = params.deck_z_at(front_t) + 0.30
+    width = max(params.cabin_half_width_at(front_t) * 0.82, 0.34)
+    base_z = params.deck_z_at(front_t) + 0.22
 
     vertices = [
-        (front_x + 0.12, width * 0.24, base_z + 0.20),
-        (front_x - 0.09, width * 0.72, base_z + 0.17),
-        (front_x - 0.09, width * 0.76, base_z),
-        (front_x + 0.12, width * 0.28, base_z + 0.02),
+        (front_x + 0.10, width * 0.24, base_z + 0.17),
+        (front_x - 0.10, width * 0.72, base_z + 0.14),
+        (front_x - 0.10, width * 0.76, base_z),
+        (front_x + 0.10, width * 0.28, base_z + 0.02),
     ]
     faces = [(0, 1, 2, 3)]
     return vertices, faces
@@ -238,25 +238,25 @@ def build_deckhouse(params: SailboatParams, context: dict) -> dict[str, bpy.type
         (
             "CanopyFrontFrame_Starboard",
             [
-                (params.stern_x() + 1.20, 0.68, params.deck_z_at(0.18) + 0.12),
-                (params.stern_x() + 1.25, 0.72, params.deck_z_at(0.18) + 0.58),
-                (params.stern_x() + 1.27, 0.66, params.deck_z_at(0.18) + params.canopy_top_height),
+                (params.stern_x() + 1.37, 0.62, params.deck_z_at(0.19) + 0.10),
+                (params.stern_x() + 1.41, 0.66, params.deck_z_at(0.19) + 0.50),
+                (params.stern_x() + 1.43, 0.60, params.deck_z_at(0.19) + params.canopy_top_height - 0.02),
             ],
         ),
         (
             "CanopyRearFrame_Starboard",
             [
-                (params.stern_x() + 2.14, 0.72, params.deck_z_at(0.25) + 0.07),
-                (params.stern_x() + 2.20, 0.76, params.deck_z_at(0.25) + 0.56),
-                (params.stern_x() + 2.22, 0.68, params.deck_z_at(0.25) + params.canopy_top_height - 0.01),
+                (params.stern_x() + 2.10, 0.66, params.deck_z_at(0.25) + 0.06),
+                (params.stern_x() + 2.16, 0.70, params.deck_z_at(0.25) + 0.48),
+                (params.stern_x() + 2.18, 0.62, params.deck_z_at(0.25) + params.canopy_top_height - 0.03),
             ],
         ),
         (
             "CanopyTopRail_Starboard",
             [
-                (params.stern_x() + 1.27, 0.66, params.deck_z_at(0.18) + params.canopy_top_height),
-                (params.stern_x() + 1.68, 0.72, params.deck_z_at(0.22) + params.canopy_top_height + 0.03),
-                (params.stern_x() + 2.22, 0.68, params.deck_z_at(0.25) + params.canopy_top_height - 0.01),
+                (params.stern_x() + 1.43, 0.60, params.deck_z_at(0.19) + params.canopy_top_height - 0.02),
+                (params.stern_x() + 1.76, 0.66, params.deck_z_at(0.22) + params.canopy_top_height + 0.00),
+                (params.stern_x() + 2.18, 0.62, params.deck_z_at(0.25) + params.canopy_top_height - 0.03),
             ],
         ),
     ]
@@ -279,9 +279,9 @@ def build_deckhouse(params: SailboatParams, context: dict) -> dict[str, bpy.type
         )
 
     aft_span_points = [
-        (params.stern_x() + 2.14, -0.68, params.deck_z_at(0.25) + params.canopy_top_height - 0.01),
-        (params.stern_x() + 2.20, 0.0, params.deck_z_at(0.25) + params.canopy_top_height + 0.02),
-        (params.stern_x() + 2.14, 0.68, params.deck_z_at(0.25) + params.canopy_top_height - 0.01),
+        (params.stern_x() + 2.10, -0.62, params.deck_z_at(0.25) + params.canopy_top_height - 0.03),
+        (params.stern_x() + 2.15, 0.0, params.deck_z_at(0.25) + params.canopy_top_height - 0.01),
+        (params.stern_x() + 2.10, 0.62, params.deck_z_at(0.25) + params.canopy_top_height - 0.03),
     ]
     create_curve_object(
         "CanopyAftSpan",
