@@ -7,6 +7,13 @@ import bpy
 from mathutils import Vector
 
 
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from blender_automation.config import load_config
+
+
 CAMERA_NAME = "PipelineCamera"
 SUN_NAME = "PipelineSun"
 FILL_NAME = "PipelineFill"
@@ -14,7 +21,9 @@ FILL_NAME = "PipelineFill"
 
 def stage_args() -> list[str]:
     if "--" not in sys.argv:
-        raise SystemExit("render_stage.py requires scene and preview paths after '--'.")
+        raise SystemExit(
+            "render_stage.py requires config, scene, preview, and hull preview paths after '--'."
+        )
     return sys.argv[sys.argv.index("--") + 1 :]
 
 
@@ -39,23 +48,12 @@ def collection_bounds(collection: bpy.types.Collection) -> tuple[Vector, Vector]
     return minimum, maximum
 
 
-def ensure_camera(target_collection: bpy.types.Collection) -> bpy.types.Object:
+def ensure_camera() -> bpy.types.Object:
     camera = bpy.data.objects.get(CAMERA_NAME)
     if camera is None or camera.type != "CAMERA":
         camera_data = bpy.data.cameras.new(CAMERA_NAME)
         camera = bpy.data.objects.new(CAMERA_NAME, camera_data)
         bpy.context.scene.collection.objects.link(camera)
-
-    minimum, maximum = collection_bounds(target_collection)
-    center = (minimum + maximum) * 0.5
-    size = maximum - minimum
-    span = max(size.x, size.y, size.z, 1.0)
-    location = center + Vector((span * 1.22, -span * 2.10, span * 0.28))
-    target = Vector((center.x, center.y, minimum.z + size.z * 0.16))
-
-    camera.location = location
-    camera.rotation_euler = (target - location).to_track_quat("-Z", "Y").to_euler()
-    camera.data.lens = 50
     bpy.context.scene.camera = camera
     return camera
 
@@ -96,14 +94,14 @@ def ensure_sun() -> bpy.types.Object:
     return sun
 
 
-def ensure_fill_light(target_collection: bpy.types.Collection) -> bpy.types.Object:
+def ensure_fill_light(bounds: tuple[Vector, Vector]) -> bpy.types.Object:
     fill = bpy.data.objects.get(FILL_NAME)
     if fill is None or fill.type != "LIGHT":
         light_data = bpy.data.lights.new(FILL_NAME, type="AREA")
         fill = bpy.data.objects.new(FILL_NAME, light_data)
         bpy.context.scene.collection.objects.link(fill)
 
-    minimum, maximum = collection_bounds(target_collection)
+    minimum, maximum = bounds
     center = (minimum + maximum) * 0.5
     size = maximum - minimum
     span = max(size.x, size.y, size.z, 1.0)
@@ -164,36 +162,67 @@ def render_to_file(preview_path: Path) -> None:
 
 def main() -> int:
     args = stage_args()
-    if len(args) != 3:
+    if len(args) != 4:
         raise SystemExit(
-            "Usage: render_stage.py -- <scene.blend> <preview.png> <hull_preview.png>"
+            "Usage: render_stage.py -- <config.json> <scene.blend> <preview.png> <hull_preview.png>"
         )
 
-    scene_path = Path(args[0]).resolve()
-    preview_path = Path(args[1]).resolve()
-    hull_preview_path = Path(args[2]).resolve()
+    config = load_config(args[0])
+    scene_path = Path(args[1]).resolve()
+    preview_path = Path(args[2]).resolve()
+    hull_preview_path = Path(args[3]).resolve()
     preview_path.parent.mkdir(parents=True, exist_ok=True)
 
     bpy.ops.wm.open_mainfile(filepath=str(scene_path))
-    target_collection = bpy.data.collections.get("Sailboat")
+    root_collection_name = config["validation"]["root_collection"]
+    target_collection = bpy.data.collections.get(root_collection_name)
     if target_collection is None:
-        raise SystemExit("Sailboat collection not found in scene.")
+        raise SystemExit(f"{root_collection_name} collection not found in scene.")
 
-    minimum, maximum = collection_bounds(target_collection)
-    camera = ensure_camera(target_collection)
+    bounds = collection_bounds(target_collection)
+    camera = ensure_camera()
     ensure_sun()
-    ensure_fill_light(target_collection)
+    ensure_fill_light(bounds)
     ensure_world()
     configure_render(preview_path)
 
-    frame_camera(camera, minimum, maximum, (1.22, -2.10, 0.28), 0.16, 50)
+    render_cfg = config.get("render", {})
+    full_cfg = render_cfg.get(
+        "full_preview",
+        {"location_factor": [1.22, -2.10, 0.28], "target_height_factor": 0.16, "lens": 50},
+    )
+    frame_camera(
+        camera,
+        bounds[0],
+        bounds[1],
+        tuple(full_cfg["location_factor"]),
+        full_cfg["target_height_factor"],
+        full_cfg["lens"],
+    )
     render_to_file(preview_path)
 
-    hull_minimum = minimum.copy()
-    hull_maximum = maximum.copy()
-    hull_maximum.z = minimum.z + (maximum.z - minimum.z) * 0.36
-    frame_camera(camera, hull_minimum, hull_maximum, (1.45, -2.25, 0.12), 0.28, 58)
-    render_to_file(hull_preview_path)
+    hull_cfg = render_cfg.get(
+        "hull_preview",
+        {
+            "enabled": True,
+            "z_fraction": 0.36,
+            "location_factor": [1.45, -2.25, 0.12],
+            "target_height_factor": 0.28,
+            "lens": 58,
+        },
+    )
+    if hull_cfg.get("enabled", True):
+        hull_maximum = bounds[1].copy()
+        hull_maximum.z = bounds[0].z + (bounds[1].z - bounds[0].z) * hull_cfg.get("z_fraction", 0.36)
+        frame_camera(
+            camera,
+            bounds[0],
+            hull_maximum,
+            tuple(hull_cfg["location_factor"]),
+            hull_cfg["target_height_factor"],
+            hull_cfg["lens"],
+        )
+        render_to_file(hull_preview_path)
 
     print(f"Rendered preview to {preview_path}")
     print(f"Rendered hull preview to {hull_preview_path}")

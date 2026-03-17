@@ -9,18 +9,23 @@ import subprocess
 import sys
 
 
-ROOT = Path(__file__).resolve().parents[1]
-STAGES_DIR = ROOT / "automation" / "stages"
+ROOT = Path(__file__).resolve().parent
+STAGES_DIR = ROOT / "stages"
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run the headless Blender build/render/validate pipeline."
+        description="Run a reusable headless Blender build/render/validate pipeline."
+    )
+    parser.add_argument(
+        "--config",
+        required=True,
+        help="Path to the project pipeline config JSON.",
     )
     parser.add_argument(
         "--output",
-        default=str(ROOT / "output" / "latest"),
-        help="Directory for scene.blend, preview.png, report.json, and pipeline.log",
+        required=True,
+        help="Directory for scene.blend, previews, report.json, and pipeline.log",
     )
     parser.add_argument(
         "--open-preview",
@@ -65,6 +70,7 @@ def run_stage(
     stage_script: Path,
     stage_args: list[str],
     log_path: Path,
+    working_dir: Path,
     allow_failure: bool = False,
 ) -> int:
     command = blender_command(blender_exe, stage_script, stage_args)
@@ -75,7 +81,7 @@ def run_stage(
 
         process = subprocess.run(
             command,
-            cwd=ROOT,
+            cwd=working_dir,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
@@ -102,10 +108,14 @@ def open_preview(preview_path: Path) -> None:
 def main() -> int:
     args = parse_args()
     blender_exe = resolve_blender_exe()
+    config_path = Path(args.config).resolve()
+    if not config_path.exists():
+        raise SystemExit(f"Config file not found: {config_path}")
 
     output_dir = Path(args.output).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    project_root = config_path.parent
     scene_path = output_dir / "scene.blend"
     preview_path = output_dir / "preview.png"
     hull_preview_path = output_dir / "hull_preview.png"
@@ -119,21 +129,24 @@ def main() -> int:
         "build",
         blender_exe,
         STAGES_DIR / "build_stage.py",
-        [str(scene_path)],
+        [str(config_path), str(scene_path)],
         log_path,
+        project_root,
     )
     run_stage(
         "render",
         blender_exe,
         STAGES_DIR / "render_stage.py",
-        [str(scene_path), str(preview_path), str(hull_preview_path)],
+        [str(config_path), str(scene_path), str(preview_path), str(hull_preview_path)],
         log_path,
+        project_root,
     )
     validate_exit = run_stage(
         "validate",
         blender_exe,
         STAGES_DIR / "validate_stage.py",
         [
+            str(config_path),
             str(scene_path),
             str(preview_path),
             str(hull_preview_path),
@@ -141,6 +154,7 @@ def main() -> int:
             str(log_path),
         ],
         log_path,
+        project_root,
         allow_failure=True,
     )
 

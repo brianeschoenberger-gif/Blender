@@ -1,0 +1,47 @@
+{
+  "builder": {
+    "script": "build_sailboat.py",
+    "function": "build_sailboat"
+  },
+  "validation": {
+    "root_collection": "Sailboat",
+    "required_child_collections": [
+      "Hull",
+      "Deckhouse",
+      "Rig",
+      "Sails",
+      "Canopy",
+      "Details"
+    ],
+    "required_objects": [
+      "Hull",
+      "Mast",
+      "Boom",
+      "MainSail",
+      "Jib"
+    ],
+    "required_materials": {
+      "hull": "Sailboat_Hull",
+      "deck": "Sailboat_Deck",
+      "cabin": "Sailboat_Cabin",
+      "sail": "Sailboat_Sail",
+      "canopy": "Sailboat_Canopy",
+      "metal": "Sailboat_Metal",
+      "window": "Sailboat_Window"
+    }
+  },
+  "render": {
+    "full_preview": {
+      "location_factor": [1.22, -2.1, 0.28],
+      "target_height_factor": 0.16,
+      "lens": 50
+    },
+    "hull_preview": {
+      "enabled": true,
+      "z_fraction": 0.36,
+      "location_factor": [1.45, -2.25, 0.12],
+      "target_height_factor": 0.28,
+      "lens": 58
+    }
+  }
+}

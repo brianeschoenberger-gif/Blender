@@ -11,27 +11,13 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from sailboat_builder.common import collection_triangle_count
-
-
-ROOT_COLLECTION = "Sailboat"
-REQUIRED_CHILD_COLLECTIONS = ["Hull", "Deckhouse", "Rig", "Sails", "Canopy", "Details"]
-REQUIRED_OBJECTS = ["Hull", "Mast", "Boom", "MainSail", "Jib"]
-REQUIRED_MATERIALS = {
-    "hull": "Sailboat_Hull",
-    "deck": "Sailboat_Deck",
-    "cabin": "Sailboat_Cabin",
-    "sail": "Sailboat_Sail",
-    "canopy": "Sailboat_Canopy",
-    "metal": "Sailboat_Metal",
-    "window": "Sailboat_Window",
-}
+from blender_automation.config import load_config
 
 
 def stage_args() -> list[str]:
     if "--" not in sys.argv:
         raise SystemExit(
-            "validate_stage.py requires scene, preview, report, and log paths after '--'."
+            "validate_stage.py requires config, scene, preview, hull preview, report, and log paths after '--'."
         )
     return sys.argv[sys.argv.index("--") + 1 :]
 
@@ -41,36 +27,48 @@ def write_report(report_path: Path, payload: dict) -> None:
     report_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
+def collection_triangle_count(collection: bpy.types.Collection) -> int:
+    total = 0
+    for obj in collection.all_objects:
+        if obj.type != "MESH" or obj.data is None:
+            continue
+        for polygon in obj.data.polygons:
+            total += max(1, len(polygon.vertices) - 2)
+    return total
+
+
 def main() -> int:
     args = stage_args()
-    if len(args) != 5:
+    if len(args) != 6:
         raise SystemExit(
-            "Usage: validate_stage.py -- <scene.blend> <preview.png> <hull_preview.png> <report.json> <pipeline.log>"
+            "Usage: validate_stage.py -- <config.json> <scene.blend> <preview.png> <hull_preview.png> <report.json> <pipeline.log>"
         )
 
-    scene_path = Path(args[0]).resolve()
-    preview_path = Path(args[1]).resolve()
-    hull_preview_path = Path(args[2]).resolve()
-    report_path = Path(args[3]).resolve()
-    log_path = Path(args[4]).resolve()
+    config = load_config(args[0])
+    scene_path = Path(args[1]).resolve()
+    preview_path = Path(args[2]).resolve()
+    hull_preview_path = Path(args[3]).resolve()
+    report_path = Path(args[4]).resolve()
+    log_path = Path(args[5]).resolve()
 
     bpy.ops.wm.open_mainfile(filepath=str(scene_path))
 
     checks: dict[str, bool] = {}
     warnings: list[str] = []
-
-    root_collection = bpy.data.collections.get(ROOT_COLLECTION)
+    validation = config["validation"]
+    root_collection_name = validation["root_collection"]
+    root_collection = bpy.data.collections.get(root_collection_name)
     checks["root_collection"] = root_collection is not None
 
-    for name in REQUIRED_CHILD_COLLECTIONS:
+    for name in validation.get("required_child_collections", []):
         checks[f"collection_{name.lower()}"] = (
             root_collection is not None and root_collection.children.get(name) is not None
         )
 
-    for object_name in REQUIRED_OBJECTS:
+    for object_name in validation.get("required_objects", []):
         checks[f"object_{object_name.lower()}"] = bpy.data.objects.get(object_name) is not None
 
-    for check_name, material_name in REQUIRED_MATERIALS.items():
+    for check_name, material_name in validation.get("required_materials", {}).items():
         checks[f"material_{check_name}"] = bpy.data.materials.get(material_name) is not None
 
     checks["preview_exists"] = preview_path.exists()
@@ -78,7 +76,7 @@ def main() -> int:
 
     if root_collection is None:
         triangle_count = 0
-        warnings.append("Sailboat root collection is missing.")
+        warnings.append(f"{root_collection_name} root collection is missing.")
     else:
         triangle_count = collection_triangle_count(root_collection)
         if triangle_count == 0:
