@@ -74,20 +74,20 @@ def build_sails(
     boom_end = rigging_data["boom_end"]
     mast_base = rigging_data["mast_base"]
 
-    main_head = (mast_top[0] - 0.08, 0.0, mast_top[2] - 1.78)
-    main_tack = (params.mast_x - 0.03, 0.0, params.boom_z)
+    main_head = (mast_top[0] - 0.05, 0.0, mast_top[2] - 1.56)
+    main_tack = (params.mast_x - 0.02, 0.0, params.boom_z)
     main_vertices, main_faces = _build_triangular_sail(
         main_tack,
         boom_end,
         main_head,
         cols=params.main_sail_resolution[0],
         rows=params.main_sail_resolution[1],
-        camber=params.sail_camber * 0.68,
-        twist=0.05,
-        leech_curve_x=0.22,
-        leech_curve_z=0.16,
-        foot_sag_z=0.06,
-        luff_s_curve_x=0.02,
+        camber=params.sail_camber * 0.52,
+        twist=0.03,
+        leech_curve_x=0.14,
+        leech_curve_z=0.09,
+        foot_sag_z=0.035,
+        luff_s_curve_x=0.014,
     )
     mainsail = create_mesh_object(
         "MainSail",
@@ -98,21 +98,21 @@ def build_sails(
         parent=root_empty,
     )
 
-    jib_head = (params.mast_x + 0.06, 0.0, params.mast_base_z() + params.jib_foretriangle_height - 0.80)
-    jib_tack = (params.bow_x() - 0.20, 0.0, params.deck_z_at(1.0) + 0.30)
-    jib_clew = (params.mast_x + 0.06, 0.0, params.deck_z_at(0.56) + 0.96)
+    jib_head = (params.mast_x + 0.03, 0.0, params.mast_base_z() + params.jib_foretriangle_height - 0.52)
+    jib_tack = (params.bow_x() - 0.18, 0.0, params.deck_z_at(1.0) + 0.32)
+    jib_clew = (params.mast_x + 0.03, 0.0, params.deck_z_at(0.55) + 1.00)
     jib_vertices, jib_faces = _build_triangular_sail(
         jib_tack,
         jib_clew,
         jib_head,
         cols=params.jib_resolution[0],
         rows=params.jib_resolution[1],
-        camber=params.sail_camber * 0.34,
-        twist=-0.01,
-        leech_curve_x=0.12,
-        leech_curve_z=0.06,
-        foot_sag_z=0.02,
-        luff_s_curve_x=0.02,
+        camber=params.sail_camber * 0.28,
+        twist=-0.005,
+        leech_curve_x=0.07,
+        leech_curve_z=0.03,
+        foot_sag_z=0.012,
+        luff_s_curve_x=0.012,
     )
     jib = create_mesh_object(
         "Jib",

@@ -24,22 +24,22 @@ def _sample_profile(profile: tuple[tuple[float, ...], ...], t: float, column: in
 @dataclass(frozen=True)
 class SailboatParams:
     name: str = "Sailboat"
-    hull_length: float = 11.2
-    beam: float = 2.94
-    hull_height: float = 2.6
-    deck_height: float = 0.22
-    cabin_roof_height: float = 0.72
-    canopy_top_height: float = 0.66
-    mast_height: float = 11.6
-    boom_length: float = 3.56
-    jib_foretriangle_height: float = 8.35
-    mast_x: float = 0.30
-    boom_z: float = 0.95
-    sail_camber: float = 0.12
+    hull_length: float = 11.45
+    beam: float = 3.12
+    hull_height: float = 2.65
+    deck_height: float = 0.24
+    cabin_roof_height: float = 0.62
+    canopy_top_height: float = 0.60
+    mast_height: float = 12.4
+    boom_length: float = 3.72
+    jib_foretriangle_height: float = 9.10
+    mast_x: float = 0.35
+    boom_z: float = 1.03
+    sail_camber: float = 0.082
     main_sail_resolution: tuple[int, int] = (14, 18)
     jib_resolution: tuple[int, int] = (12, 16)
-    rail_height: float = 0.95
-    stripe_z: tuple[float, float] = (-1.64, -1.48)
+    rail_height: float = 0.90
+    stripe_z: tuple[float, float] = (-1.58, -1.44)
     detail_toggles: dict[str, bool] = field(
         default_factory=lambda: {
             "portholes": True,
@@ -51,22 +51,22 @@ class SailboatParams:
         }
     )
     hull_profile: tuple[tuple[float, float, float, float], ...] = (
-        (0.00, 0.04, 0.98, 0.12),
-        (0.06, 0.11, 0.80, 0.08),
-        (0.14, 0.30, 0.49, 0.04),
-        (0.28, 0.66, 0.17, 0.00),
-        (0.54, 0.90, 0.00, 0.00),
-        (0.76, 0.82, 0.01, 0.01),
-        (0.90, 0.42, 0.10, 0.04),
-        (1.00, 0.07, 0.24, 0.07),
+        (0.00, 0.05, 0.99, 0.10),
+        (0.07, 0.16, 0.84, 0.07),
+        (0.16, 0.42, 0.54, 0.04),
+        (0.30, 0.74, 0.20, 0.01),
+        (0.52, 0.96, 0.01, 0.00),
+        (0.74, 0.90, 0.00, 0.01),
+        (0.90, 0.48, 0.09, 0.03),
+        (1.00, 0.09, 0.22, 0.06),
     )
     deck_profile: tuple[tuple[float, float, float], ...] = (
         (0.00, 0.00, 0.01),
-        (0.15, 0.10, 0.024),
-        (0.35, 0.31, 0.048),
-        (0.58, 0.36, 0.046),
-        (0.80, 0.19, 0.026),
-        (1.00, 0.00, 0.02),
+        (0.15, 0.13, 0.022),
+        (0.36, 0.34, 0.044),
+        (0.58, 0.40, 0.042),
+        (0.80, 0.22, 0.024),
+        (1.00, 0.00, 0.018),
     )
     canopy_profile: tuple[tuple[float, float], ...] = (
         (0.00, 0.01),

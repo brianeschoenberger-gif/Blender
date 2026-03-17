@@ -38,14 +38,14 @@ def build_rigging(params: SailboatParams, context: dict) -> dict[str, object]:
     mast_base = (params.mast_x, 0.0, params.mast_base_z())
     mast_top = (params.mast_x, 0.0, params.mast_base_z() + params.mast_height)
     boom_end = (params.mast_x - params.boom_length, 0.0, params.boom_z)
-    bowsprit_tip = (params.bow_x() + 0.20, 0.0, params.deck_z_at(1.0) + 0.40)
+    bowsprit_tip = (params.bow_x() + 0.16, 0.0, params.deck_z_at(1.0) + 0.36)
 
     mast = _make_cylinder_object(
         "Mast",
         rig_collection,
         mast_base,
         mast_top,
-        0.075,
+        0.068,
         materials["metal"],
         root_empty,
     )
@@ -54,7 +54,7 @@ def build_rigging(params: SailboatParams, context: dict) -> dict[str, object]:
         rig_collection,
         (params.mast_x, 0.0, params.boom_z),
         boom_end,
-        0.045,
+        0.040,
         materials["metal"],
         root_empty,
     )
@@ -63,33 +63,33 @@ def build_rigging(params: SailboatParams, context: dict) -> dict[str, object]:
         rig_collection,
         (params.bow_x() - 0.45, 0.0, params.deck_z_at(1.0) + 0.42),
         bowsprit_tip,
-        0.035,
+        0.032,
         materials["metal"],
         root_empty,
     )
 
     bow_rail_points = [
-        (params.bow_x() - 1.00, 1.10, params.deck_z_at(0.92) + 0.55),
-        (params.bow_x() - 0.45, 1.28, params.deck_z_at(0.97) + 0.82),
-        (params.bow_x() - 0.05, 0.98, params.deck_z_at(1.0) + 0.62),
+        (params.bow_x() - 0.92, 1.02, params.deck_z_at(0.92) + 0.50),
+        (params.bow_x() - 0.42, 1.16, params.deck_z_at(0.97) + 0.72),
+        (params.bow_x() - 0.06, 0.90, params.deck_z_at(1.0) + 0.57),
     ]
     stern_rail_points = [
-        (params.stern_x() + 0.75, 1.12, params.deck_z_at(0.06) + 0.62),
-        (params.stern_x() + 0.22, 1.00, params.deck_z_at(0.0) + 0.70),
-        (params.stern_x() - 0.08, 0.72, params.deck_z_at(0.0) + 0.48),
+        (params.stern_x() + 0.88, 1.02, params.deck_z_at(0.08) + 0.54),
+        (params.stern_x() + 0.34, 0.92, params.deck_z_at(0.02) + 0.62),
+        (params.stern_x() + 0.04, 0.68, params.deck_z_at(0.0) + 0.42),
     ]
     lifeline_points = [
-        (params.stern_x() + 0.70, 1.06, params.deck_z_at(0.07) + params.rail_height),
-        (params.stern_x() + 2.40, 1.40, params.deck_z_at(0.25) + params.rail_height),
-        (params.mast_x + 0.90, 1.56, params.deck_z_at(0.58) + params.rail_height),
-        (params.bow_x() - 0.60, 1.12, params.deck_z_at(0.95) + params.rail_height),
+        (params.stern_x() + 0.82, 1.00, params.deck_z_at(0.08) + params.rail_height),
+        (params.stern_x() + 2.55, 1.28, params.deck_z_at(0.28) + params.rail_height),
+        (params.mast_x + 0.96, 1.40, params.deck_z_at(0.58) + params.rail_height),
+        (params.bow_x() - 0.56, 1.03, params.deck_z_at(0.95) + params.rail_height),
     ]
 
     bow_rail = create_curve_object(
         "BowRail_Starboard",
         rig_collection,
         bow_rail_points,
-        bevel_depth=0.008,
+        bevel_depth=0.007,
         material=materials["metal"],
         parent=root_empty,
     )
@@ -97,7 +97,7 @@ def build_rigging(params: SailboatParams, context: dict) -> dict[str, object]:
         "BowRail_Port",
         rig_collection,
         _mirror_points(bow_rail_points),
-        bevel_depth=0.008,
+        bevel_depth=0.007,
         material=materials["metal"],
         parent=root_empty,
     )
@@ -105,7 +105,7 @@ def build_rigging(params: SailboatParams, context: dict) -> dict[str, object]:
         "SternRail_Starboard",
         rig_collection,
         stern_rail_points,
-        bevel_depth=0.008,
+        bevel_depth=0.007,
         material=materials["metal"],
         parent=root_empty,
     )
@@ -113,7 +113,7 @@ def build_rigging(params: SailboatParams, context: dict) -> dict[str, object]:
         "SternRail_Port",
         rig_collection,
         _mirror_points(stern_rail_points),
-        bevel_depth=0.008,
+        bevel_depth=0.007,
         material=materials["metal"],
         parent=root_empty,
     )
@@ -121,7 +121,7 @@ def build_rigging(params: SailboatParams, context: dict) -> dict[str, object]:
         "LifelineUpper_Starboard",
         rig_collection,
         lifeline_points,
-        bevel_depth=0.0025,
+        bevel_depth=0.0021,
         material=materials["metal"],
         parent=root_empty,
     )
@@ -129,7 +129,7 @@ def build_rigging(params: SailboatParams, context: dict) -> dict[str, object]:
         "LifelineUpper_Port",
         rig_collection,
         _mirror_points(lifeline_points),
-        bevel_depth=0.0025,
+        bevel_depth=0.0021,
         material=materials["metal"],
         parent=root_empty,
     )
@@ -137,7 +137,7 @@ def build_rigging(params: SailboatParams, context: dict) -> dict[str, object]:
         "LifelineLower_Starboard",
         rig_collection,
         [(x, y, z - 0.22) for x, y, z in lifeline_points],
-        bevel_depth=0.0020,
+        bevel_depth=0.0018,
         material=materials["metal"],
         parent=root_empty,
     )
@@ -145,7 +145,7 @@ def build_rigging(params: SailboatParams, context: dict) -> dict[str, object]:
         "LifelineLower_Port",
         rig_collection,
         _mirror_points([(x, y, z - 0.22) for x, y, z in lifeline_points]),
-        bevel_depth=0.0020,
+        bevel_depth=0.0018,
         material=materials["metal"],
         parent=root_empty,
     )
@@ -153,12 +153,12 @@ def build_rigging(params: SailboatParams, context: dict) -> dict[str, object]:
     stays: list[bpy.types.Object] = []
     if params.detail_toggles["standing_rigging"]:
         stay_specs = [
-            ("Forestay", mast_top, (params.bow_x() - 0.12, 0.0, params.deck_z_at(1.0) + 0.25)),
-            ("Backstay", mast_top, (params.stern_x() + 0.20, 0.0, params.deck_z_at(0.0) + 0.55)),
-            ("ShroudFore_Starboard", (params.mast_x, 0.0, params.mast_base_z() + 9.2), (params.mast_x + 0.25, 1.58, params.deck_z_at(0.62) + 0.12)),
-            ("ShroudAft_Starboard", (params.mast_x, 0.0, params.mast_base_z() + 8.0), (params.mast_x - 0.35, 1.50, params.deck_z_at(0.48) + 0.12)),
-            ("ShroudFore_Port", (params.mast_x, 0.0, params.mast_base_z() + 9.2), (params.mast_x + 0.25, -1.58, params.deck_z_at(0.62) + 0.12)),
-            ("ShroudAft_Port", (params.mast_x, 0.0, params.mast_base_z() + 8.0), (params.mast_x - 0.35, -1.50, params.deck_z_at(0.48) + 0.12)),
+            ("Forestay", mast_top, (params.bow_x() - 0.10, 0.0, params.deck_z_at(1.0) + 0.27)),
+            ("Backstay", mast_top, (params.stern_x() + 0.26, 0.0, params.deck_z_at(0.0) + 0.51)),
+            ("ShroudFore_Starboard", (params.mast_x, 0.0, params.mast_base_z() + 9.6), (params.mast_x + 0.30, 1.42, params.deck_z_at(0.62) + 0.12)),
+            ("ShroudAft_Starboard", (params.mast_x, 0.0, params.mast_base_z() + 8.4), (params.mast_x - 0.30, 1.34, params.deck_z_at(0.48) + 0.11)),
+            ("ShroudFore_Port", (params.mast_x, 0.0, params.mast_base_z() + 9.6), (params.mast_x + 0.30, -1.42, params.deck_z_at(0.62) + 0.12)),
+            ("ShroudAft_Port", (params.mast_x, 0.0, params.mast_base_z() + 8.4), (params.mast_x - 0.30, -1.34, params.deck_z_at(0.48) + 0.11)),
         ]
         for name, start, end in stay_specs:
             stays.append(
@@ -166,7 +166,7 @@ def build_rigging(params: SailboatParams, context: dict) -> dict[str, object]:
                     name,
                     rig_collection,
                     [start, end],
-                    bevel_depth=0.0022,
+                    bevel_depth=0.0019,
                     material=materials["metal"],
                     parent=root_empty,
                 )

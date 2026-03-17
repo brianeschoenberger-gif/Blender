@@ -57,7 +57,7 @@ def _hull_material(params: SailboatParams) -> bpy.types.Material:
     links = material.node_tree.links
 
     shader = _make_output(material)
-    _set_principled(shader, (0.96, 0.97, 0.98, 1.0), roughness=0.24)
+    _set_principled(shader, (0.97, 0.975, 0.98, 1.0), roughness=0.19)
 
     geometry = nodes.new("ShaderNodeNewGeometry")
     geometry.location = (-900, 40)
@@ -76,8 +76,8 @@ def _hull_material(params: SailboatParams) -> bpy.types.Material:
     multiply.location = (-260, 50)
     mix = nodes.new("ShaderNodeMixRGB")
     mix.location = (-60, 50)
-    mix.inputs["Color1"].default_value = (0.96, 0.97, 0.98, 1.0)
-    mix.inputs["Color2"].default_value = (0.06, 0.18, 0.44, 1.0)
+    mix.inputs["Color1"].default_value = (0.97, 0.975, 0.98, 1.0)
+    mix.inputs["Color2"].default_value = (0.02, 0.14, 0.38, 1.0)
 
     links.new(geometry.outputs["Position"], separate_xyz.inputs["Vector"])
     links.new(separate_xyz.outputs["Z"], greater.inputs[0])
@@ -94,21 +94,21 @@ def ensure_materials(params: SailboatParams) -> dict[str, bpy.types.Material]:
 
     deck = _new_material("Sailboat_Deck")
     deck_shader = _make_output(deck)
-    _set_principled(deck_shader, (0.94, 0.92, 0.86, 1.0), roughness=0.45)
+    _set_principled(deck_shader, (0.95, 0.93, 0.87, 1.0), roughness=0.42)
 
     cabin = _new_material("Sailboat_Cabin")
     cabin_shader = _make_output(cabin)
-    _set_principled(cabin_shader, (0.92, 0.90, 0.84, 1.0), roughness=0.38)
+    _set_principled(cabin_shader, (0.94, 0.92, 0.88, 1.0), roughness=0.34)
 
     sail = _new_material("Sailboat_Sail")
     _configure_transparency(sail)
     sail_shader = _make_output(sail)
     _set_principled(
         sail_shader,
-        (0.95, 0.96, 0.94, 1.0),
-        roughness=0.68,
-        alpha=0.86,
-        transmission_weight=0.08,
+        (0.93, 0.94, 0.93, 1.0),
+        roughness=0.62,
+        alpha=0.82,
+        transmission_weight=0.10,
     )
 
     window = _new_material("Sailboat_Window")
@@ -116,19 +116,19 @@ def ensure_materials(params: SailboatParams) -> dict[str, bpy.types.Material]:
     window_shader = _make_output(window)
     _set_principled(
         window_shader,
-        (0.07, 0.10, 0.14, 1.0),
-        roughness=0.12,
-        alpha=0.84,
-        transmission_weight=0.06,
+        (0.04, 0.07, 0.10, 1.0),
+        roughness=0.09,
+        alpha=0.78,
+        transmission_weight=0.10,
     )
 
     canopy = _new_material("Sailboat_Canopy")
     canopy_shader = _make_output(canopy)
-    _set_principled(canopy_shader, (0.04, 0.25, 0.55, 1.0), roughness=0.56)
+    _set_principled(canopy_shader, (0.02, 0.20, 0.52, 1.0), roughness=0.50)
 
     metal = _new_material("Sailboat_Metal")
     metal_shader = _make_output(metal)
-    _set_principled(metal_shader, (0.64, 0.67, 0.72, 1.0), roughness=0.24, metallic=0.92)
+    _set_principled(metal_shader, (0.66, 0.69, 0.73, 1.0), roughness=0.20, metallic=0.95)
 
     trim = _new_material("Sailboat_Trim")
     trim_shader = _make_output(trim)
