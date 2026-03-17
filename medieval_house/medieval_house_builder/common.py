@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import bpy
+import math
 
 
 def ensure_collection(name: str, parent: bpy.types.Collection | None = None) -> bpy.types.Collection:
@@ -95,4 +96,52 @@ def create_box(
         (2, 3, 7, 6),
         (3, 0, 4, 7),
     ]
+    return create_mesh_object(name, f"{name}Mesh", collection, vertices, faces, material)
+
+
+def create_prism(
+    name: str,
+    collection: bpy.types.Collection,
+    points_2d: list[tuple[float, float]],
+    z_min: float,
+    z_max: float,
+    material: bpy.types.Material | None = None,
+) -> bpy.types.Object:
+    vertices: list[tuple[float, float, float]] = []
+    count = len(points_2d)
+    for x, y in points_2d:
+        vertices.append((x, y, z_min))
+    for x, y in points_2d:
+        vertices.append((x, y, z_max))
+
+    faces: list[tuple[int, ...]] = [tuple(range(count)), tuple(range(count, count * 2))]
+    for index in range(count):
+        next_index = (index + 1) % count
+        faces.append((index, next_index, next_index + count, index + count))
+
+    return create_mesh_object(name, f"{name}Mesh", collection, vertices, faces, material)
+
+
+def create_ngon_cylinder(
+    name: str,
+    collection: bpy.types.Collection,
+    radius: float,
+    height: float,
+    center: tuple[float, float, float],
+    segments: int = 12,
+    material: bpy.types.Material | None = None,
+) -> bpy.types.Object:
+    cx, cy, cz = center
+    half_height = height * 0.5
+    vertices: list[tuple[float, float, float]] = []
+    for ring_z in (cz - half_height, cz + half_height):
+        for index in range(segments):
+            angle = (index / segments) * math.tau
+            vertices.append((cx + math.cos(angle) * radius, cy + math.sin(angle) * radius, ring_z))
+
+    faces: list[tuple[int, ...]] = [tuple(range(segments)), tuple(range(segments, segments * 2))]
+    for index in range(segments):
+        next_index = (index + 1) % segments
+        faces.append((index, next_index, next_index + segments, index + segments))
+
     return create_mesh_object(name, f"{name}Mesh", collection, vertices, faces, material)

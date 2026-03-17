@@ -17,6 +17,7 @@ def _new_material(name: str) -> bpy.types.Material:
     material = bpy.data.materials.get(name)
     if material is None:
         material = bpy.data.materials.new(name)
+    material.use_fake_user = True
     material.use_nodes = True
     nodes = material.node_tree.nodes
     nodes.clear()
