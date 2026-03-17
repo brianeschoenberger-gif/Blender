@@ -43,15 +43,16 @@ def write_report(report_path: Path, payload: dict) -> None:
 
 def main() -> int:
     args = stage_args()
-    if len(args) != 4:
+    if len(args) != 5:
         raise SystemExit(
-            "Usage: validate_stage.py -- <scene.blend> <preview.png> <report.json> <pipeline.log>"
+            "Usage: validate_stage.py -- <scene.blend> <preview.png> <hull_preview.png> <report.json> <pipeline.log>"
         )
 
     scene_path = Path(args[0]).resolve()
     preview_path = Path(args[1]).resolve()
-    report_path = Path(args[2]).resolve()
-    log_path = Path(args[3]).resolve()
+    hull_preview_path = Path(args[2]).resolve()
+    report_path = Path(args[3]).resolve()
+    log_path = Path(args[4]).resolve()
 
     bpy.ops.wm.open_mainfile(filepath=str(scene_path))
 
@@ -73,6 +74,7 @@ def main() -> int:
         checks[f"material_{check_name}"] = bpy.data.materials.get(material_name) is not None
 
     checks["preview_exists"] = preview_path.exists()
+    checks["hull_preview_exists"] = hull_preview_path.exists()
 
     if root_collection is None:
         triangle_count = 0
@@ -85,6 +87,8 @@ def main() -> int:
     status = "pass" if all(checks.values()) else "fail"
     if not checks["preview_exists"]:
         warnings.append("Preview image is missing.")
+    if not checks["hull_preview_exists"]:
+        warnings.append("Hull preview image is missing.")
 
     payload = {
         "status": status,
@@ -99,6 +103,7 @@ def main() -> int:
         "artifacts": {
             "scene_blend": str(scene_path),
             "preview_png": str(preview_path),
+            "hull_preview_png": str(hull_preview_path),
             "report_json": str(report_path),
             "pipeline_log": str(log_path),
         },

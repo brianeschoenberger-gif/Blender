@@ -60,6 +60,30 @@ def ensure_camera(target_collection: bpy.types.Collection) -> bpy.types.Object:
     return camera
 
 
+def frame_camera(
+    camera: bpy.types.Object,
+    minimum: Vector,
+    maximum: Vector,
+    location_factor: tuple[float, float, float],
+    target_height_factor: float,
+    lens: float,
+) -> None:
+    center = (minimum + maximum) * 0.5
+    size = maximum - minimum
+    span = max(size.x, size.y, size.z, 1.0)
+    location = center + Vector(
+        (
+            span * location_factor[0],
+            span * location_factor[1],
+            span * location_factor[2],
+        )
+    )
+    target = Vector((center.x, center.y, minimum.z + size.z * target_height_factor))
+    camera.location = location
+    camera.rotation_euler = (target - location).to_track_quat("-Z", "Y").to_euler()
+    camera.data.lens = lens
+
+
 def ensure_sun() -> bpy.types.Object:
     sun = bpy.data.objects.get(SUN_NAME)
     if sun is None or sun.type != "LIGHT":
@@ -133,13 +157,21 @@ def configure_render(preview_path: Path) -> None:
             eevee.shadow_pool_size = "1024"
 
 
+def render_to_file(preview_path: Path) -> None:
+    bpy.context.scene.render.filepath = str(preview_path)
+    bpy.ops.render.render(write_still=True)
+
+
 def main() -> int:
     args = stage_args()
-    if len(args) != 2:
-        raise SystemExit("Usage: render_stage.py -- <scene.blend> <preview.png>")
+    if len(args) != 3:
+        raise SystemExit(
+            "Usage: render_stage.py -- <scene.blend> <preview.png> <hull_preview.png>"
+        )
 
     scene_path = Path(args[0]).resolve()
     preview_path = Path(args[1]).resolve()
+    hull_preview_path = Path(args[2]).resolve()
     preview_path.parent.mkdir(parents=True, exist_ok=True)
 
     bpy.ops.wm.open_mainfile(filepath=str(scene_path))
@@ -147,14 +179,24 @@ def main() -> int:
     if target_collection is None:
         raise SystemExit("Sailboat collection not found in scene.")
 
-    ensure_camera(target_collection)
+    minimum, maximum = collection_bounds(target_collection)
+    camera = ensure_camera(target_collection)
     ensure_sun()
     ensure_fill_light(target_collection)
     ensure_world()
     configure_render(preview_path)
 
-    bpy.ops.render.render(write_still=True)
+    frame_camera(camera, minimum, maximum, (1.22, -2.10, 0.28), 0.16, 50)
+    render_to_file(preview_path)
+
+    hull_minimum = minimum.copy()
+    hull_maximum = maximum.copy()
+    hull_maximum.z = minimum.z + (maximum.z - minimum.z) * 0.36
+    frame_camera(camera, hull_minimum, hull_maximum, (1.45, -2.25, 0.12), 0.28, 58)
+    render_to_file(hull_preview_path)
+
     print(f"Rendered preview to {preview_path}")
+    print(f"Rendered hull preview to {hull_preview_path}")
     return 0
 
 

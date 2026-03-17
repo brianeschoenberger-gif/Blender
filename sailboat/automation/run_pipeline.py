@@ -108,6 +108,7 @@ def main() -> int:
 
     scene_path = output_dir / "scene.blend"
     preview_path = output_dir / "preview.png"
+    hull_preview_path = output_dir / "hull_preview.png"
     report_path = output_dir / "report.json"
     log_path = output_dir / "pipeline.log"
 
@@ -125,14 +126,20 @@ def main() -> int:
         "render",
         blender_exe,
         STAGES_DIR / "render_stage.py",
-        [str(scene_path), str(preview_path)],
+        [str(scene_path), str(preview_path), str(hull_preview_path)],
         log_path,
     )
     validate_exit = run_stage(
         "validate",
         blender_exe,
         STAGES_DIR / "validate_stage.py",
-        [str(scene_path), str(preview_path), str(report_path), str(log_path)],
+        [
+            str(scene_path),
+            str(preview_path),
+            str(hull_preview_path),
+            str(report_path),
+            str(log_path),
+        ],
         log_path,
         allow_failure=True,
     )

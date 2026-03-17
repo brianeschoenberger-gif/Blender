@@ -9,7 +9,7 @@ Use Blender's Python data API first. Reach for operators only when there is no s
 
 ## Default Workflow
 
-1. If `automation/run_pipeline.py` exists in the repo, use it before emitting raw Blender CLI commands.
+1. If a repo-local harness such as `sailboat/automation/run_pipeline.py` or `automation/run_pipeline.py` exists, use it before emitting raw Blender CLI commands.
 2. Discover the Blender executable before writing commands. Prefer `BLENDER_EXE`; do not assume `blender` is on `PATH`.
 3. Capture the Blender version early and fail clearly when the environment is missing, unknown, or outside the expected range.
 4. Prefer direct datablock creation over `bpy.ops`: create meshes with `bpy.data.meshes.new(...)`, populate with `mesh.from_pydata(...)`, validate with `mesh.validate()`, update with `mesh.update()`, create objects with `bpy.data.objects.new(...)`, and link with `collection.objects.link(obj)`.

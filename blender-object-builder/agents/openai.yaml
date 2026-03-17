@@ -1,4 +1,4 @@
 interface:
   display_name: "Blender Object Builder"
   short_description: "Script-first Blender object creation"
-  default_prompt: "Use $blender-object-builder to create or repair a Blender Python script with data APIs first. If a repo-local automation/run_pipeline.py harness exists, use it before manual Blender commands, inspect report.json before patching, and if the skill hits a reusable Blender failure, update the skill before finishing."
+  default_prompt: "Use $blender-object-builder to create or repair a Blender Python script with data APIs first. If a repo-local harness such as sailboat/automation/run_pipeline.py or automation/run_pipeline.py exists, use it before manual Blender commands, inspect report.json before patching, and if the skill hits a reusable Blender failure, update the skill before finishing."
