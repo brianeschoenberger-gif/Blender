@@ -1,0 +1,44 @@
+{
+  "builder": {
+    "script": "build_medieval_house.py",
+    "function": "build_medieval_house"
+  },
+  "validation": {
+    "root_collection": "MedievalHouse",
+    "required_child_collections": [
+      "Structure",
+      "Roof",
+      "Openings",
+      "Details",
+      "Props"
+    ],
+    "required_objects": [
+      "House_Base",
+      "House_Roof_Main",
+      "House_Door_Main",
+      "House_Chimney"
+    ],
+    "required_materials": {
+      "timber": "MedievalHouse_Timber",
+      "plaster": "MedievalHouse_Plaster",
+      "roof": "MedievalHouse_Roof",
+      "stone": "MedievalHouse_Stone",
+      "metal": "MedievalHouse_Metal",
+      "glass": "MedievalHouse_Glass"
+    }
+  },
+  "render": {
+    "full_preview": {
+      "location_factor": [1.3, -2.15, 0.36],
+      "target_height_factor": 0.24,
+      "lens": 45
+    },
+    "hull_preview": {
+      "enabled": true,
+      "z_fraction": 0.55,
+      "location_factor": [1.1, -1.55, 0.24],
+      "target_height_factor": 0.42,
+      "lens": 55
+    }
+  }
+}
