@@ -1,0 +1,1 @@
+"""Modular Blender sailboat generator."""

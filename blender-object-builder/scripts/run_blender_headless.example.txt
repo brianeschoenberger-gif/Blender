@@ -1,0 +1,25 @@
+Use this pattern for headless Blender automation.
+
+Important rules:
+- Discover the Blender executable first. Do not assume `blender` is on PATH.
+- Keep argument order intentional.
+- Use `--python-exit-code 1` so script failures propagate to the shell.
+
+Windows example:
+
+"C:\Program Files\Blender Foundation\Blender 4.5\blender.exe" ^
+  --background ^
+  --python "C:\path\to\script.py" ^
+  --python-exit-code 1
+
+Generic example:
+
+/path/to/blender \
+  --background \
+  --python /path/to/script.py \
+  --python-exit-code 1
+
+Inside the script, report the runtime version early:
+
+import bpy
+print(bpy.app.version_string)
